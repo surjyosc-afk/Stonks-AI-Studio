@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STONKS AI | Institutional Grade Analytics</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { bgDark: '#0b0c10', textMain: '#f3f4f6', textMuted: '#9ca3af' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .totp-input {
+            letter-spacing: 0.5em;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        #qrcode img {
+            margin: auto;
+            border-radius: 0.5rem;
+        }
+        .step-transition {
+            transition: all 0.4s ease-in-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b0c10; }
+        ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a5568; }
+    </style>
+</head>
+<body class="antialiased min-h-screen bg-bgDark text-textMain overflow-x-hidden flex flex-col relative selection:bg-purple-500/30">
+
+    <canvas id="stonks-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-none"></canvas>
+
+    <div class="fixed top-0 left-0 w-full z-50 flex justify-center pt-6 px-4 pointer-events-none">
+        <nav id="dynamic-nav" class="pointer-events-auto w-full max-w-7xl border border-white/5 bg-[#0b0c10]/30 backdrop-blur-xl rounded-2xl shadow-lg transition-all duration-500 ease-in-out">
+            <div id="nav-content" class="px-6 h-20 flex items-center justify-between transition-all duration-500 ease-in-out">
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-white cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">STONKS <span class="font-light text-gray-400">AI</span></span>
+                </div>
+                
+                <button onclick="openAuthModal()" class="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 transition-colors rounded-full flex items-center gap-2 shadow-lg border border-blue-400/30">
+                    Enter Studio <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="relative z-10 w-full flex flex-col">
+        
+        <section class="flex flex-col items-center justify-center px-6 min-h-screen text-center pointer-events-none">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-sm">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </span>
+                System Online • Localhost:8000
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 max-w-4xl leading-tight drop-shadow-lg">
+                Institutional Grade AI.<br>
+                <span class="gradient-text">Now on your desktop.</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-textMuted max-w-2xl mb-10 font-light leading-relaxed drop-shadow-md">
+                Harness the power of LSTM neural networks and FinBERT sentiment analysis to decode the National Stock Exchange in real-time. 
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 pointer-events-auto">
+                <button onclick="openAuthModal()" class="relative group px-8 py-4 text-base font-bold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:scale-105 flex items-center justify-center gap-3 backdrop-blur-md border border-white/10">
+                    Launch Terminal <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+                <i class="fas fa-chevron-down text-xl"></i>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-6 py-32 w-full pointer-events-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Powered by State-of-the-Art Architecture</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Built from the ground up utilizing the latest advancements in machine learning, natural language processing, and high-performance backend infrastructure.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-purple-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-network-wired text-4xl text-purple-400 mb-3 drop-shadow-[0_0_10px_rgba(167,139,250,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">PyTorch LSTM</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            Deep learning Long Short-Term Memory networks process historical OHLCV sequences to forecast future price action.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-blue-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-brain text-4xl text-blue-400 mb-3 drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">HuggingFace FinBERT</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            Pre-trained NLP transformer models actively scan and analyze live financial news to inject sentiment metrics into our Opportunity Radar.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-server text-4xl text-emerald-400 mb-3 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">FastAPI Backend</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            High-performance asynchronous Python REST API delivering ultra-low latency model inference and data routing to the terminal.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-orange-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(249,115,22,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-shield-alt text-4xl text-orange-400 mb-3 drop-shadow-[0_0_10px_rgba(251,146,60,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">Cryptographic 2FA</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            Institutional-grade security using PyOTP to generate standard time-based one-time passwords via Google Authenticator.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-pink-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(236,72,153,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-chart-bar text-4xl text-pink-400 mb-3 drop-shadow-[0_0_10px_rgba(244,114,182,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">Algorithmic Technicals</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            Automated geometry detection natively identifies dynamic support/resistance zones, breakouts, and trend reversals.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="group relative h-60 rounded-2xl p-6 bg-[#0b0c10]/40 backdrop-blur-xl border border-white/5 hover:bg-[#0b0c10]/60 hover:border-cyan-500/30 transition-all duration-500 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] flex flex-col justify-center items-center text-center">
+                    <div class="transform transition-transform duration-500 group-hover:-translate-y-10">
+                        <i class="fas fa-layer-group text-4xl text-cyan-400 mb-3 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white">Glassmorphism UI</h3>
+                    </div>
+                    <div class="absolute bottom-6 left-0 w-full px-6 opacity-0 transform translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out pointer-events-none">
+                        <p class="text-sm text-gray-400 leading-relaxed">
+                            A proprietary rendering pipeline utilizing Tailwind CSS and HTML5 Canvas to deliver a lightweight, visually stunning frontend.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-4xl mx-auto px-6 py-32 mb-12 w-full pointer-events-auto">
+            <div class="bg-[#0b0c10]/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-[0_0_40px_rgba(0,0,0,0.5)] text-center relative overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-blue-600/10 blur-[50px] pointer-events-none"></div>
+
+                <div class="relative z-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Deploy for your Institution</h2>
+                    <p class="text-gray-400 mb-10 max-w-lg mx-auto">Get exclusive access to the STONKS AI backend infrastructure, custom model tuning, and enterprise API keys.</p>
+                    
+                    <form onsubmit="event.preventDefault();" class="max-w-md mx-auto space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" placeholder="First Name" class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                            <input type="text" placeholder="Last Name" class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                        </div>
+                        <input type="text" placeholder="Institution / Hedge Fund Name" class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                        <input type="email" placeholder="Corporate Email" class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                        <textarea placeholder="How do you plan to utilize our analytics?" rows="3" class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md resize-none"></textarea>
+                        
+                        <button type="submit" class="w-full py-4 mt-2 text-sm font-bold text-white transition-all duration-300 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 backdrop-blur-md hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                            Request Enterprise Demo
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12 opacity-50 text-sm">
+                <p>&copy; 2026 STONKS AI. Developed by Team 4Criminals. All rights reserved.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-[#0b0c10]/30 backdrop-blur-[3px] transition-opacity" onclick="closeAuthModal()"></div>
+        
+        <div class="relative glass-panel rounded-2xl p-8 w-full max-w-sm mx-4 shadow-[0_8px_32px_rgba(0,0,0,0.6)] border border-white/20 transform scale-95 transition-transform duration-300 overflow-hidden bg-[#0b0c10]/50 backdrop-blur-xl" id="authBox">
+            
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors z-50">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+
+            <div id="step1-login" class="step-transition block">
+                <div class="text-center mb-6 mt-2">
+                    <div class="h-12 w-12 mx-auto rounded-full bg-blue-500/10 flex items-center justify-center mb-4 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                        <i class="fas fa-user-shield text-blue-400 text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold tracking-tight text-white mb-2">System Login</h2>
+                    <p class="text-xs text-gray-300 px-4">Enter your institutional credentials to proceed.</p>
+                </div>
+
+                <form onsubmit="handlePasswordLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Email Address</label>
+                        <input type="email" id="emailInput" value="analyst@stonks.com" required class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Master Password</label>
+                        <input type="password" id="passwordInput" placeholder="••••••••" required class="w-full px-4 py-3 bg-[#0b0c10]/60 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors backdrop-blur-md">
+                        <p id="loginError" class="text-red-400 text-xs font-bold mt-2 hidden">Invalid credentials.</p>
+                    </div>
+                    
+                    <button type="submit" class="w-full py-3 mt-4 text-sm font-bold text-white transition-all duration-300 bg-blue-600/90 hover:bg-blue-500 rounded-lg flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(37,99,235,0.4)] border border-blue-400/30">
+                        Authenticate <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div id="step2-totp" class="step-transition hidden translate-x-full absolute inset-0 p-8">
+                <div class="text-center mb-6 mt-2">
+                    <h2 class="text-xl font-bold tracking-tight text-white mb-2">Device Sync Required</h2>
+                    <p class="text-xs text-gray-300 px-4">Scan this QR code with Google Authenticator.</p>
+                </div>
+
+                <div class="flex flex-col items-center justify-center mb-8">
+                    <div class="p-3 bg-white/90 backdrop-blur-md rounded-xl shadow-[0_0_25px_rgba(255,255,255,0.15)]">
+                        <div id="qrcode" class="w-40 h-40 flex items-center justify-center">
+                            <i class="fas fa-spinner fa-spin text-gray-600 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <form onsubmit="handleTOTPLogin(event)" class="space-y-6">
+                    <div>
+                        <input 
+                            type="text" 
+                            id="totpInput"
+                            maxlength="6" 
+                            pattern="\d{6}" 
+                            required 
+                            autocomplete="off"
+                            class="totp-input w-full px-4 py-4 text-3xl bg-[#0b0c10]/60 border-2 border-gray-600 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-600 backdrop-blur-md" 
+                            placeholder="000000"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        >
+                        <p id="totpError" class="text-red-400 text-xs font-bold mt-2 hidden text-center">Invalid code.</p>
+                    </div>
+                    
+                    <button type="submit" id="verifyBtn" class="w-full py-4 text-sm font-bold text-white transition-all duration-300 bg-gradient-to-r from-blue-600/90 to-purple-600/90 rounded-xl hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] flex items-center justify-center gap-2 border border-purple-400/30">
+                        <i class="fas fa-check-circle"></i> Verify & Enter
+                    </button>
+                </form>
+            </div>
+            
+            <div id="authLoader" class="absolute inset-0 bg-[#0b0c10]/80 backdrop-blur-xl hidden flex-col items-center justify-center z-20">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-purple-500 h-12 w-12 mb-4 shadow-[0_0_15px_rgba(167,139,250,0.5)]"></div>
+                <p id="loaderText" class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 tracking-widest uppercase animate-pulse">
+                    Verifying...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dynamicNav = document.getElementById('dynamic-nav');
+        const navContent = document.getElementById('nav-content');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                dynamicNav.classList.remove('max-w-7xl', 'rounded-2xl', 'bg-[#0b0c10]/30', 'border-white/5');
+                dynamicNav.classList.add('max-w-5xl', 'rounded-full', 'bg-white/10', 'border-white/20');
+                navContent.classList.remove('h-20');
+                navContent.classList.add('h-16', 'px-8');
+            } else {
+                dynamicNav.classList.add('max-w-7xl', 'rounded-2xl', 'bg-[#0b0c10]/30', 'border-white/5');
+                dynamicNav.classList.remove('max-w-5xl', 'rounded-full', 'bg-white/10', 'border-white/20');
+                navContent.classList.add('h-20');
+                navContent.classList.remove('h-16', 'px-8');
+            }
+        });
+    </script>
+
+    <script>
+        const canvas = document.getElementById('stonks-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const nodes = Array.from({length: 80}, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4
+        }));
+
+        const candles = Array.from({length: 25}, (_, i) => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+            h: Math.random() * 80 + 30,
+            color: Math.random() > 0.45 ? '#10b981' : '#ef4444', 
+            speed: 0.2 + Math.random() * 0.3
+        }));
+
+        function drawBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.shadowBlur = 0; 
+            candles.forEach(c => {
+                c.x -= c.speed;
+                if(c.x < -50) { c.x = canvas.width + 50; c.y = Math.random() * canvas.height * 0.6 + canvas.height * 0.2; }
+                
+                ctx.fillStyle = c.color + '25';   
+                ctx.strokeStyle = c.color + '50'; 
+                ctx.lineWidth = 1.5;
+                
+                ctx.beginPath();
+                ctx.moveTo(c.x + 4, c.y - 15);
+                ctx.lineTo(c.x + 4, c.y + c.h + 15);
+                ctx.stroke();
+                
+                ctx.fillRect(c.x, c.y, 8, c.h);
+            });
+
+            nodes.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                
+                if(n.x < 0 || n.x > canvas.width) n.vx *= -1;
+                if(n.y < 0 || n.y > canvas.height) n.vy *= -1;
+
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(167, 139, 250, 0.9)'; 
+                ctx.fillStyle = 'rgba(167, 139, 250, 1)';     
+
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 2, 0, Math.PI * 2); 
+                ctx.fill();
+
+                nodes.forEach(n2 => {
+                    const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
+                    if(dist < 140) { 
+                        ctx.beginPath();
+                        ctx.shadowBlur = 0; 
+                        ctx.strokeStyle = `rgba(167, 139, 250, ${(1 - dist/140) * 0.45})`;
+                        ctx.lineWidth = 1.2;
+                        ctx.moveTo(n.x, n.y);
+                        ctx.lineTo(n2.x, n2.y);
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(drawBackground);
+        }
+        drawBackground();
+    </script>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const modal = document.getElementById('authModal');
+        const authBox = document.getElementById('authBox');
+        const loader = document.getElementById('authLoader');
+        const loaderText = document.getElementById('loaderText');
+        const step1 = document.getElementById('step1-login');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginError = document.getElementById('loginError');
+        const step2 = document.getElementById('step2-totp');
+        const totpInput = document.getElementById('totpInput');
+        const totpError = document.getElementById('totpError');
+        const qrContainer = document.getElementById('qrcode');
+        let verifiedEmail = "";
+
+        function openAuthModal() {
+            // Lock scrolling on the body
+            document.body.style.overflow = 'hidden';
+            
+            step1.classList.remove('hidden', '-translate-x-full');
+            step1.classList.add('block');
+            step2.classList.remove('block', 'translate-x-0');
+            step2.classList.add('hidden', 'translate-x-full', 'absolute');
+            passwordInput.value = '';
+            totpInput.value = '';
+            loginError.classList.add('hidden');
+            totpError.classList.add('hidden');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                authBox.classList.remove('scale-95');
+                authBox.classList.add('scale-100');
+                passwordInput.focus();
+            }, 10);
+        }
+
+        function closeAuthModal() {
+            // Unlock scrolling on the body
+            document.body.style.overflow = '';
+            
+            authBox.classList.remove('scale-100');
+            authBox.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300); 
+        }
+
+        async function handlePasswordLogin(event) {
+            event.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            verifiedEmail = email;
+            loginError.classList.add('hidden');
+            loaderText.innerText = "Authenticating...";
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                if (response.ok) {
+                    await loadTOTPSetup(email);
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    step1.classList.remove('block');
+                    step1.classList.add('hidden', '-translate-x-full');
+                    step2.classList.remove('hidden', 'translate-x-full', 'absolute');
+                    step2.classList.add('block', 'translate-x-0');
+                    totpInput.focus();
+                } else {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    loginError.innerText = "Invalid institutional credentials.";
+                    loginError.classList.remove('hidden');
+                }
+            } catch (err) {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                loginError.innerText = "Server connection failed.";
+                loginError.classList.remove('hidden');
+            }
+        }
+
+        async function loadTOTPSetup(email) {
+            try {
+                const response = await fetch(`${API_BASE}/auth/setup?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                qrContainer.innerHTML = "";
+                new QRCode(qrContainer, {
+                    text: data.uri,
+                    width: 160,
+                    height: 160,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.M
+                });
+            } catch (err) {
+                qrContainer.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>';
+            }
+        }
+
+        async function handleTOTPLogin(event) {
+            event.preventDefault(); 
+            const code = totpInput.value;
+            if (code.length !== 6) {
+                totpError.innerText = "Code must be exactly 6 digits.";
+                totpError.classList.remove('hidden');
+                return;
+            }
+            totpError.classList.add('hidden');
+            loaderText.innerText = "Verifying Cryptography...";
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: verifiedEmail, code: code })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('stonks_auth_token', data.token);
+                    window.location.href = 'terminal.html';
+                } else {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    totpError.innerText = "Invalid 2FA code.";
+                    totpError.classList.remove('hidden');
+                    totpInput.value = '';
+                    totpInput.focus();
+                }
+            } catch (err) {
+                loader.classList.add('hidden');
+                loader.classList.remove('flex');
+                totpError.innerText = "Connection to server failed.";
+                totpError.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

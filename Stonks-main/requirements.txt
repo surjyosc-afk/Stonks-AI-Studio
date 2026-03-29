@@ -1,0 +1,62 @@
+# ============================================================
+# STONKS — NSE AI Stock Analysis System - Requirements
+# ============================================================
+
+# Core Data & ML
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+scipy==1.13.0
+
+# Deep Learning
+torch==2.3.0
+torchvision==0.18.0
+
+# HuggingFace / NLP
+transformers==4.41.2
+tokenizers==0.19.1
+datasets==2.19.0
+sentencepiece==0.2.0
+
+# Financial Data
+alpha-vantage==2.3.1
+ta==0.11.0
+yfinance>=0.2.40          # Unpinned to allow latest API fixes
+
+# Real-time Feed
+fyers-apiv3==3.1.11
+websocket-client==1.6.1   # Downgraded to fix fyers-apiv3 conflict
+websockets==16.0
+
+# API
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.1
+python-multipart==0.0.9
+
+# Authentication & Security
+pyotp>=2.9.0              # Added for Institutional 2FA / Login Bypass
+
+# Notebook
+jupyter==1.0.0
+ipykernel==6.29.4
+nbformat==5.10.4
+nbconvert>=7.16.0         # Added for headless automated AI training
+
+# Visualization
+matplotlib==3.9.0
+seaborn==0.13.2
+plotly==5.22.0
+
+# Utilities
+pyyaml==6.0.1
+python-dotenv==1.0.1
+tqdm==4.66.4
+joblib==1.4.2
+requests==2.31.0
+httpx==0.27.0
+beautifulsoup4==4.12.3
+lxml==5.2.1
+
+# Serialization
+h5py==3.11.0
